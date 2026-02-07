@@ -1,4 +1,4 @@
-# Avatar: Elemento
+# Avatar
 
 A retro, pixel-art turn-based strategy game based on Avatar: The Last Airbender.
 
