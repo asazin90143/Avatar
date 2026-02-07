@@ -338,7 +338,28 @@ function log(msg) {
     logs.innerText = msg;
     console.log(msg);
 }
+// Debug Logger
+function logError(msg) {
+    const consoleDiv = document.getElementById('debug-console');
+    const list = document.getElementById('debug-list');
+    if (consoleDiv && list) {
+        consoleDiv.style.display = 'block';
+        const li = document.createElement('li');
+        li.innerText = `[ERROR] ${msg}`;
+        list.appendChild(li);
+    }
+    console.error(msg);
+}
+
+window.onerror = function (message, source, lineno, colno, error) {
+    logError(`${message} at ${source}:${lineno}:${colno}`);
+};
+
 // Start
 document.addEventListener('DOMContentLoaded', () => {
-    init();
+    try {
+        init();
+    } catch (e) {
+        logError(e.message);
+    }
 });
