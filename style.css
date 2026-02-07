@@ -1,3 +1,4 @@
+/* --- GLOBAL STYLES --- */
 body {
     background-color: #212529;
     font-family: 'Press Start 2P', cursive;
@@ -13,27 +14,41 @@ body {
     width: 100%;
     max-width: 800px;
     text-align: center;
+    padding: 10px;
 }
 
 .screen {
     display: none;
     margin-top: 20px;
+    animation: fadeIn 0.5s;
 }
 
 .screen.active {
     display: block;
 }
 
-/* Character Grid */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* --- CHARACTER SELECT --- */
 .char-grid {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 15px;
     flex-wrap: wrap;
+    margin-top: 20px;
 }
 
 .char-card {
-    width: 120px;
+    width: 130px;
+    font-size: 10px;
     cursor: pointer;
     transition: transform 0.2s;
 }
@@ -42,85 +57,159 @@ body {
     transform: scale(1.1);
 }
 
-/* Battle Arena */
+/* --- BATTLE ARENA --- */
 .battle-arena {
     border: 4px solid #fff;
-    padding: 20px;
+    padding: 10px;
     background-color: #444;
-    /* Fallback */
     background-size: cover;
     background-position: center;
-    height: 500px;
+    height: 550px;
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    border-radius: 4px;
 }
 
-/* Sprites (Placeholders for your Pixel Art) */
+/* --- HUD --- */
+.hud {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid #fff;
+}
+
+.player-stats {
+    width: 42%;
+    text-align: left;
+    font-size: 10px;
+}
+
+.vs {
+    font-size: 20px;
+    align-self: center;
+    color: #f1c40f;
+}
+
+.status-effects {
+    height: 20px;
+    color: #e74c3c;
+    font-size: 8px;
+    margin-top: 5px;
+}
+
+/* --- SPRITES --- */
 .sprites-area {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    height: 200px;
-    padding: 0 50px;
+    height: 250px;
+    padding: 0 40px;
+}
+
+.sprite-container {
+    text-align: center;
+}
+
+.indicator {
+    font-size: 10px;
+    margin-top: 10px;
+    text-shadow: 2px 2px #000;
 }
 
 .sprite {
     width: 64px;
     height: 64px;
-    background-color: #ccc;
-    /* Placeholder Color */
-    transform: scale(3);
-    /* Make pixel art big */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    transform: scale(2.5);
     image-rendering: pixelated;
+    /* Keeps pixel art sharp */
+    transition: filter 0.3s;
 }
 
-/* Element Specific Colors for Placeholders */
+/* ================================================================
+   IMAGE ASSETS - REPLACE URLS HERE IF YOU DOWNLOAD YOUR OWN FILES
+   ================================================================
+*/
+
+/* 1. WATER (Katara) */
 .water-bender {
-    background-color: #3498db;
+    background-image: url('https://img.itch.zone/aW1nLzM5OTY5NzYuZ2lm/original/7h%2B616.gif');
 }
 
+/* 2. FIRE (Zuko - Placeholder) */
 .fire-bender {
-    background-color: #e74c3c;
+    background-image: url('https://art.pixilart.com/sr2c02055660851.png');
 }
 
+/* 3. EARTH (Toph - Placeholder) */
 .earth-bender {
-    background-color: #27ae60;
+    background-image: url('https://art.pixilart.com/bd04f201087455b.png');
 }
 
+/* 4. AIR (Monk/Tenzin - Distinct from Avatar) */
 .air-bender {
-    background-color: #f1c40f;
+    background-image: url('https://art.pixilart.com/sr2345e692131aws3.png');
 }
 
+/* 5. AVATAR (Aang/Korra State) */
 .avatar-bender {
-    background: linear-gradient(45deg, #3498db, #e74c3c, #27ae60, #f1c40f);
+    background-image: url('https://pixelartmaker-data-78746291193.nyc3.digitaloceanspaces.com/image/570d55653492d21.png');
 }
 
-/* HUD */
-.hud {
-    display: flex;
-    justify-content: space-between;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    border-radius: 5px;
-}
-
-.player-stats {
-    width: 40%;
-    text-align: left;
-}
-
-.vs {
-    font-size: 24px;
-    align-self: center;
-}
-
-/* Controls */
+/* --- CONTROLS --- */
 .controls-area {
-    background: rgba(0, 0, 0, 0.8);
-    padding: 15px;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 10px;
     border-top: 2px solid white;
+}
+
+.log-box {
+    background: #000;
+    color: #0f0;
+    padding: 5px;
+    height: 40px;
+    font-size: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #333;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-group {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.btn-group button {
+    font-size: 10px;
+    padding: 8px;
+}
+
+.small-text {
+    font-size: 8px;
+    margin-bottom: 5px;
+    color: #aaa;
+}
+
+.btn-group-small {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.btn-group-small button {
+    font-size: 8px;
+    padding: 4px;
 }
 
 .hidden {
