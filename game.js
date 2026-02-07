@@ -259,6 +259,10 @@ function cpuTurn() {
     if (!state.isOver) {
         // Process Player Status Effects before giving control back
         processStatusEffects(state.player, "Player");
+        if (state.player.currentHp <= 0) {
+            checkWinCondition();
+            return;
+        }
         state.turn = 'player';
     }
 }
