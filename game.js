@@ -338,6 +338,7 @@ function log(msg) {
     logs.innerText = msg;
     console.log(msg);
 }
-
 // Start
-init();
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+});
