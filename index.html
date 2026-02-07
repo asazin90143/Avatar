@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avatar: Elemento</title>
+    <link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1><i class="nes-icon star"></i> Avatar: Elemento</h1>
+        </header>
+
+        <section id="char-select-screen" class="screen active">
+            <div class="nes-container with-title is-centered">
+                <p class="title">Select Your Bender</p>
+                <div class="char-grid" id="char-grid">
+                </div>
+            </div>
+        </section>
+
+        <section id="map-select-screen" class="screen hidden">
+            <div class="nes-container with-title is-centered">
+                <p class="title">Select Battleground</p>
+                <div class="map-options">
+                    <button class="nes-btn is-primary" onclick="startGame('Air Temple')">Air Temple</button>
+                    <button class="nes-btn is-error" onclick="startGame('Fire Nation Ship')">Fire Nation</button>
+                    <button class="nes-btn is-success" onclick="startGame('Earth Kingdom')">Earth Kingdom</button>
+                    <button class="nes-btn is-primary" onclick="startGame('Water Tribe')">Water Tribe</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="battle-screen" class="screen hidden">
+            <div class="battle-arena" id="arena-bg">
+
+                <div class="hud">
+                    <div class="player-stats">
+                        <span id="p1-name">Player</span>
+                        <progress class="nes-progress is-success" value="100" max="100" id="p1-health"></progress>
+                        <div id="p1-status"></div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="player-stats">
+                        <span id="p2-name">CPU</span>
+                        <progress class="nes-progress is-error" value="100" max="100" id="p2-health"></progress>
+                        <div id="p2-status"></div>
+                    </div>
+                </div>
+
+                <div class="sprites-area">
+                    <div id="p1-sprite" class="sprite"></div>
+                    <div id="p2-sprite" class="sprite"></div>
+                </div>
+
+                <div class="controls-area">
+                    <div id="avatar-switch-panel" class="hidden">
+                        <p>Avatar State: Switch Element</p>
+                        <button class="nes-btn is-primary" onclick="avatarSwitch('water')">Water</button>
+                        <button class="nes-btn is-error" onclick="avatarSwitch('fire')">Fire</button>
+                        <button class="nes-btn is-success" onclick="avatarSwitch('earth')">Earth</button>
+                        <button class="nes-btn is-warning" onclick="avatarSwitch('air')">Air</button>
+                    </div>
+
+                    <div id="action-panel">
+                        <p id="battle-log">Battle Started!</p>
+                        <div class="btn-group">
+                            <button class="nes-btn" onclick="executeMove('light')">Light</button>
+                            <button class="nes-btn" onclick="executeMove('mid')">Mid</button>
+                            <button class="nes-btn" onclick="executeMove('heavy')">Heavy</button>
+                            <button class="nes-btn is-warning" id="btn-special"
+                                onclick="executeMove('special')">Special</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
