@@ -121,8 +121,15 @@ function selectCharacter(key) {
     if (ui.p2 && ui.p2.sprite) ui.p2.sprite.className = `sprite ${cpuKey}-bender`;
 
     // Switch to Map Screen
-    if (screens.select) screens.select.classList.remove('active');
-    if (screens.map) screens.map.classList.add('active');
+    if (screens.select) {
+        screens.select.classList.remove('active');
+        screens.select.classList.add('hidden');
+    }
+    if (screens.map) {
+        screens.map.classList.remove('hidden');
+        screens.map.classList.add('active');
+    }
+    logDebug("Switched to Map Selection screen");
 }
 
 function createFighter(key, isCpu) {
@@ -140,8 +147,14 @@ function startGame(mapName) {
     logDebug(`Starting game on map: ${mapName}`);
     state.map = mapName;
 
-    if (screens.map) screens.map.classList.remove('active');
-    if (screens.battle) screens.battle.classList.add('active');
+    if (screens.map) {
+        screens.map.classList.remove('active');
+        screens.map.classList.add('hidden');
+    }
+    if (screens.battle) {
+        screens.battle.classList.remove('hidden');
+        screens.battle.classList.add('active');
+    }
 
     // Set Background Colors (Replace with URL in CSS if desired)
     const arena = document.getElementById('arena-bg');
