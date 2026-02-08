@@ -239,7 +239,7 @@ function handleSpecial(attacker, defender) {
     }
     else if (el === 'fire') {
         // Fire special: Immediate burst + strong Burn DOT
-        const burstDmg = 15;
+        const burstDmg = 20;
         defender.currentHp -= burstDmg;
         if (defender.currentHp < 0) defender.currentHp = 0;
         defender.effects.burn = 5; // 5 turns of burn
