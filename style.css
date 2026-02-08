@@ -51,10 +51,18 @@ body {
     font-size: 10px;
     cursor: pointer;
     transition: transform 0.2s;
+    background-color: #fff;
+    /* Fallback visibility */
+    color: #000;
+    /* Fallback visibility */
+    border: 2px solid #ccc;
+    /* Fallback */
+    margin-bottom: 10px;
 }
 
 .char-card:hover {
     transform: scale(1.1);
+    background-color: #eee;
 }
 
 /* --- BATTLE ARENA --- */

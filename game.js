@@ -23,34 +23,59 @@ const state = {
 };
 
 /* --- DOM ELEMENTS --- */
-const screens = {
-    select: document.getElementById('char-select-screen'),
-    map: document.getElementById('map-select-screen'),
-    battle: document.getElementById('battle-screen')
-};
-
-const logs = document.getElementById('battle-log');
-const restartBtn = document.getElementById('restart-btn');
-
-// UI Helpers
-const ui = {
-    p1: {
-        bar: document.getElementById('p1-health'),
-        sprite: document.getElementById('p1-sprite'),
-        status: document.getElementById('p1-status'),
-        name: document.getElementById('p1-name')
-    },
-    p2: {
-        bar: document.getElementById('p2-health'),
-        sprite: document.getElementById('p2-sprite'),
-        status: document.getElementById('p2-status'),
-        name: document.getElementById('p2-name')
-    }
-};
+let screens = {};
+let logs = null;
+let restartBtn = null;
+let ui = {};
 
 /* --- INITIALIZATION --- */
+function initDom() {
+    logDebug("Initializing DOM elements...");
+    try {
+        screens = {
+            select: document.getElementById('char-select-screen'),
+            map: document.getElementById('map-select-screen'),
+            battle: document.getElementById('battle-screen')
+        };
+
+        logs = document.getElementById('battle-log');
+        restartBtn = document.getElementById('restart-btn');
+
+        ui = {
+            p1: {
+                bar: document.getElementById('p1-health'),
+                sprite: document.getElementById('p1-sprite'),
+                status: document.getElementById('p1-status'),
+                name: document.getElementById('p1-name')
+            },
+            p2: {
+                bar: document.getElementById('p2-health'),
+                sprite: document.getElementById('p2-sprite'),
+                status: document.getElementById('p2-status'),
+                name: document.getElementById('p2-name')
+            }
+        };
+
+        if (!screens.select) throw new Error("Missing Select Screen div");
+
+        logDebug("DOM Initialized Successfully");
+    } catch (e) {
+        logError("Failed to init DOM: " + e.message);
+    }
+}
+
 function init() {
+    initDom();
+
     const grid = document.getElementById('char-grid');
+    if (!grid) {
+        logError("Character Grid element missing!");
+        return;
+    }
+
+    // Clear existing buttons to prevent duplicates on potential re-runs
+    grid.innerHTML = '';
+
     Object.keys(CHARACTERS).forEach(key => {
         const btn = document.createElement('button');
         btn.className = `nes-btn char-card`;
@@ -58,18 +83,31 @@ function init() {
         const displayKey = key.charAt(0).toUpperCase() + key.slice(1);
         btn.innerText = displayKey;
 
-        // Color coding buttons
+        // Color coding buttons (nes.css classes)
         if (key === 'water') btn.classList.add('is-primary');
         if (key === 'fire') btn.classList.add('is-error');
         if (key === 'earth') btn.classList.add('is-success');
         if (key === 'air') btn.classList.add('is-warning');
 
+        /* 
+           Crucial: Adding inline style for basic visibility if nes.css fails 
+           (though style.css handles this too now)
+        */
+        if (!document.querySelector('link[href*="nes.css"]')) {
+            btn.style.border = "1px solid white";
+            btn.style.margin = "5px";
+        }
+
         btn.onclick = () => selectCharacter(key);
         grid.appendChild(btn);
     });
+
+    logDebug("Character buttons generated.");
 }
 
 function selectCharacter(key) {
+    logDebug(`Selected character: ${key}`);
+
     // Player Setup
     state.player = createFighter(key, false);
 
@@ -79,12 +117,12 @@ function selectCharacter(key) {
     state.cpu = createFighter(cpuKey, true);
 
     // Update Sprites
-    ui.p1.sprite.className = `sprite ${key}-bender`;
-    ui.p2.sprite.className = `sprite ${cpuKey}-bender`;
+    if (ui.p1 && ui.p1.sprite) ui.p1.sprite.className = `sprite ${key}-bender`;
+    if (ui.p2 && ui.p2.sprite) ui.p2.sprite.className = `sprite ${cpuKey}-bender`;
 
     // Switch to Map Screen
-    screens.select.classList.remove('active');
-    screens.map.classList.add('active');
+    if (screens.select) screens.select.classList.remove('active');
+    if (screens.map) screens.map.classList.add('active');
 }
 
 function createFighter(key, isCpu) {
@@ -99,25 +137,30 @@ function createFighter(key, isCpu) {
 }
 
 function startGame(mapName) {
+    logDebug(`Starting game on map: ${mapName}`);
     state.map = mapName;
-    screens.map.classList.remove('active');
-    screens.battle.classList.add('active');
+
+    if (screens.map) screens.map.classList.remove('active');
+    if (screens.battle) screens.battle.classList.add('active');
 
     // Set Background Colors (Replace with URL in CSS if desired)
     const arena = document.getElementById('arena-bg');
-    if (mapName.includes('Water')) arena.style.background = 'linear-gradient(to bottom, #001f3f, #0074D9)';
-    if (mapName.includes('Fire')) arena.style.background = 'linear-gradient(to bottom, #85144b, #FF4136)';
-    if (mapName.includes('Earth')) arena.style.background = 'linear-gradient(to bottom, #3D9970, #2ECC40)';
-    if (mapName.includes('Air')) arena.style.background = 'linear-gradient(to bottom, #7FDBFF, #39CCCC)';
+    if (arena) {
+        if (mapName.includes('Water')) arena.style.background = 'linear-gradient(to bottom, #001f3f, #0074D9)';
+        if (mapName.includes('Fire')) arena.style.background = 'linear-gradient(to bottom, #85144b, #FF4136)';
+        if (mapName.includes('Earth')) arena.style.background = 'linear-gradient(to bottom, #3D9970, #2ECC40)';
+        if (mapName.includes('Air')) arena.style.background = 'linear-gradient(to bottom, #7FDBFF, #39CCCC)';
+    }
 
-    ui.p1.name.innerText = state.player.name;
-    ui.p2.name.innerText = state.cpu.name;
+    if (ui.p1 && ui.p1.name) ui.p1.name.innerText = state.player.name;
+    if (ui.p2 && ui.p2.name) ui.p2.name.innerText = state.cpu.name;
 
     updateHealthUI();
 
     // If Player is Avatar, show Switch Panel
     if (state.player.isAvatar) {
-        document.getElementById('avatar-switch-panel').classList.remove('hidden');
+        const switchPanel = document.getElementById('avatar-switch-panel');
+        if (switchPanel) switchPanel.classList.remove('hidden');
         state.player.element = 'water'; // Default start element
         log("Avatar State Active! Choose your element.");
     } else {
@@ -303,41 +346,46 @@ function avatarSwitch(newElement) {
 
 /* --- UTILS --- */
 function updateHealthUI() {
-    ui.p1.bar.value = state.player.currentHp;
-    ui.p1.bar.max = state.player.maxHp;
-    ui.p2.bar.value = state.cpu.currentHp;
-    ui.p2.bar.max = state.cpu.maxHp;
+    if (ui.p1 && ui.p1.bar) {
+        ui.p1.bar.value = state.player.currentHp;
+        ui.p1.bar.max = state.player.maxHp;
+    }
+    if (ui.p2 && ui.p2.bar) {
+        ui.p2.bar.value = state.cpu.currentHp;
+        ui.p2.bar.max = state.cpu.maxHp;
+    }
 
     // Status Text
     let p1Status = "";
     if (state.player.effects.burn > 0) p1Status += "BURNED ";
     if (state.player.effects.stun > 0) p1Status += "STUNNED ";
     if (state.player.effects.evade > 0) p1Status += "EVASIVE ";
-    ui.p1.status.innerText = p1Status;
+    if (ui.p1 && ui.p1.status) ui.p1.status.innerText = p1Status;
 
     let p2Status = "";
     if (state.cpu.effects.burn > 0) p2Status += "BURNED ";
     if (state.cpu.effects.stun > 0) p2Status += "STUNNED ";
     if (state.cpu.effects.evade > 0) p2Status += "EVASIVE ";
-    ui.p2.status.innerText = p2Status;
+    if (ui.p2 && ui.p2.status) ui.p2.status.innerText = p2Status;
 }
 
 function checkWinCondition() {
     if (state.player.currentHp <= 0) {
         log("You Lost! The Fire Nation wins...");
         state.isOver = true;
-        restartBtn.classList.remove('hidden');
+        if (restartBtn) restartBtn.classList.remove('hidden');
     } else if (state.cpu.currentHp <= 0) {
         log("You Won! Balance is restored.");
         state.isOver = true;
-        restartBtn.classList.remove('hidden');
+        if (restartBtn) restartBtn.classList.remove('hidden');
     }
 }
 
 function log(msg) {
-    logs.innerText = msg;
-    console.log(msg);
+    if (logs) logs.innerText = msg;
+    logDebug(msg);
 }
+
 // Debug Logger
 function logError(msg) {
     const consoleDiv = document.getElementById('debug-console');
@@ -351,6 +399,20 @@ function logError(msg) {
     console.error(msg);
 }
 
+function logDebug(msg) {
+    const consoleDiv = document.getElementById('debug-console');
+    const list = document.getElementById('debug-list');
+    if (consoleDiv && list) {
+        // Optional: show info logs too if desired, for now keeping mainly for errors/important state
+        // consoleDiv.style.display = 'block';
+        // const li = document.createElement('li');
+        // li.style.color = '#0f0';
+        // li.innerText = `[INFO] ${msg}`;
+        // list.appendChild(li);
+    }
+    console.log(msg);
+}
+
 window.onerror = function (message, source, lineno, colno, error) {
     logError(`${message} at ${source}:${lineno}:${colno}`);
 };
@@ -358,6 +420,7 @@ window.onerror = function (message, source, lineno, colno, error) {
 // Start
 document.addEventListener('DOMContentLoaded', () => {
     try {
+        console.log("Game script starting...");
         init();
     } catch (e) {
         logError(e.message);
