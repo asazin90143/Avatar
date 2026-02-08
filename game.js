@@ -236,8 +236,12 @@ function handleSpecial(attacker, defender) {
         log(`${name} healed for ${healAmt} HP!`);
     }
     else if (el === 'fire') {
-        defender.effects.burn = 4;
-        log(`${name} used BURN! Enemy will take dmg.`);
+        // Fire special: Immediate burst + strong Burn DOT
+        const burstDmg = 15;
+        defender.currentHp -= burstDmg;
+        if (defender.currentHp < 0) defender.currentHp = 0;
+        defender.effects.burn = 5; // 5 turns of burn
+        log(`${name} used INFERNO! ${burstDmg} dmg + BURN for 5 turns!`);
     }
     else if (el === 'earth') {
         defender.effects.stun = 2; // Skips 2 turns
@@ -328,10 +332,11 @@ function cpuTurn() {
 }
 
 function processStatusEffects(char, name) {
-    // Burn
+    // Burn - Enhanced: 8% max HP per turn
     if (char.effects.burn > 0) {
-        const burnDmg = Math.floor(char.maxHp * 0.05);
+        const burnDmg = Math.floor(char.maxHp * 0.08);
         char.currentHp -= burnDmg;
+        if (char.currentHp < 0) char.currentHp = 0;
         char.effects.burn--;
         log(`${name} took ${burnDmg} BURN damage!`);
         updateHealthUI();
