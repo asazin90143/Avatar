@@ -147,27 +147,27 @@ body {
 
 /* 1. WATER (Katara) */
 .water-bender {
-    background-image: url('https://img.itch.zone/aW1nLzM5OTY5NzYuZ2lm/original/7h%2B616.gif');
+    background-image: url('./characters/Water bender.jpg');
 }
 
-/* 2. FIRE (Zuko - Placeholder) */
+/* 2. FIRE (Zuko) */
 .fire-bender {
-    background-image: url('https://art.pixilart.com/sr2c02055660851.png');
+    background-image: url('./characters/Fire bender.jpg');
 }
 
-/* 3. EARTH (Toph - Placeholder) */
+/* 3. EARTH (Toph) */
 .earth-bender {
-    background-image: url('https://art.pixilart.com/bd04f201087455b.png');
+    background-image: url('./characters/Earth bender.jpg');
 }
 
-/* 4. AIR (Monk/Tenzin - Distinct from Avatar) */
+/* 4. AIR (Monk/Tenzin) */
 .air-bender {
-    background-image: url('https://art.pixilart.com/sr2345e692131aws3.png');
+    background-image: url('./characters/Air bender.jpg');
 }
 
 /* 5. AVATAR (Aang/Korra State) */
 .avatar-bender {
-    background-image: url('https://pixelartmaker-data-78746291193.nyc3.digitaloceanspaces.com/image/570d55653492d21.png');
+    background-image: url('./characters/Avatar.jpg');
 }
 
 /* --- CONTROLS --- */

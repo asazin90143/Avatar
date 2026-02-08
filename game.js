@@ -156,13 +156,15 @@ function startGame(mapName) {
         screens.battle.classList.add('active');
     }
 
-    // Set Background Colors (Replace with URL in CSS if desired)
+    // Set Background Images from local files
     const arena = document.getElementById('arena-bg');
     if (arena) {
-        if (mapName.includes('Water')) arena.style.background = 'linear-gradient(to bottom, #001f3f, #0074D9)';
-        if (mapName.includes('Fire')) arena.style.background = 'linear-gradient(to bottom, #85144b, #FF4136)';
-        if (mapName.includes('Earth')) arena.style.background = 'linear-gradient(to bottom, #3D9970, #2ECC40)';
-        if (mapName.includes('Air')) arena.style.background = 'linear-gradient(to bottom, #7FDBFF, #39CCCC)';
+        arena.style.backgroundSize = 'cover';
+        arena.style.backgroundPosition = 'center';
+        if (mapName.includes('Water')) arena.style.backgroundImage = "url('./background/Water Tribe.jpg')";
+        if (mapName.includes('Fire')) arena.style.backgroundImage = "url('./background/Fire Nation.jpg')";
+        if (mapName.includes('Earth')) arena.style.backgroundImage = "url('./background/Earth Kingdom.jpg')";
+        if (mapName.includes('Air')) arena.style.backgroundImage = "url('./background/Air Temple.jpg')";
     }
 
     if (ui.p1 && ui.p1.name) ui.p1.name.innerText = state.player.name;
