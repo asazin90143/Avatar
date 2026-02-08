@@ -140,6 +140,11 @@ body {
     transition: filter 0.3s;
 }
 
+/* Flip CPU sprite to face left */
+#p2-sprite {
+    transform: scale(2.5) scaleX(-1);
+}
+
 /* ================================================================
    IMAGE ASSETS - REPLACE URLS HERE IF YOU DOWNLOAD YOUR OWN FILES
    ================================================================
