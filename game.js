@@ -245,7 +245,7 @@ function handleSpecial(attacker, defender) {
     }
     else if (el === 'earth') {
         defender.effects.stun = 2; // Skips 2 turns
-        log(`${name} used STUN! Enemy frozen for 2 turns.`);
+        log(`${name} used STUN! Enemy stunned for 2 turns.`);
     }
     else if (el === 'air') {
         attacker.effects.evade = 4;
