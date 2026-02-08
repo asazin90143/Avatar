@@ -207,6 +207,7 @@ function performAttack(attacker, defender, moveType) {
         // Log Construction
         let msg = `${attacker === state.player ? "You" : "CPU"} used ${moveType}!`;
         if (modifier > 1) msg += " It's Super Effective!";
+        if (modifier < 1) msg += " Not very effective...";
         if (actualDmg === 0) msg = `${defender.name} EVADED the attack!`;
         log(msg);
     }
@@ -236,6 +237,7 @@ function handleSpecial(attacker, defender) {
 }
 
 function getTypeModifier(atkEl, defEl) {
+    // === STRENGTHS (1.5x) ===
     // Water beats Fire
     if (atkEl === 'water' && defEl === 'fire') return 1.5;
     // Earth beats Fire
@@ -245,9 +247,11 @@ function getTypeModifier(atkEl, defEl) {
     // Fire beats Air
     if (atkEl === 'fire' && defEl === 'air') return 1.5;
 
-    // Weaknesses (Optional balance)
+    // === WEAKNESSES (0.5x - Inverse of strengths per PRD) ===
     if (atkEl === 'fire' && defEl === 'water') return 0.5;
     if (atkEl === 'fire' && defEl === 'earth') return 0.5;
+    if (atkEl === 'earth' && defEl === 'air') return 0.5;
+    if (atkEl === 'air' && defEl === 'fire') return 0.5;
 
     return 1.0;
 }
@@ -403,12 +407,11 @@ function logDebug(msg) {
     const consoleDiv = document.getElementById('debug-console');
     const list = document.getElementById('debug-list');
     if (consoleDiv && list) {
-        // Optional: show info logs too if desired, for now keeping mainly for errors/important state
-        // consoleDiv.style.display = 'block';
-        // const li = document.createElement('li');
-        // li.style.color = '#0f0';
-        // li.innerText = `[INFO] ${msg}`;
-        // list.appendChild(li);
+        // Show all logs for debugging
+        const li = document.createElement('li');
+        li.style.color = '#2ecc71';
+        li.innerText = `[INFO] ${msg}`;
+        list.appendChild(li);
     }
     console.log(msg);
 }
