@@ -401,15 +401,7 @@ function avatarSwitch(newElement) {
 
     state.player.element = newElement;
 
-    // Update Sprite Color/Effect visual
-    const sprite = document.getElementById('p1-sprite');
-
-    // Reset classes
-    sprite.className = 'sprite';
-    // Add specific class
-    sprite.classList.add(`${newElement}-bender`);
-
-    // Visual feedback
+    // Visual feedback (Log only, keep sprite as Avatar)
     log(`Avatar switched to ${newElement.toUpperCase()}!`);
 }
 
