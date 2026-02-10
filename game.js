@@ -46,13 +46,15 @@ function initDom() {
                 bar: document.getElementById('p1-health'),
                 sprite: document.getElementById('p1-sprite'),
                 status: document.getElementById('p1-status'),
-                name: document.getElementById('p1-name')
+                name: document.getElementById('p1-name'),
+                hpText: document.getElementById('p1-hp-text')
             },
             p2: {
                 bar: document.getElementById('p2-health'),
                 sprite: document.getElementById('p2-sprite'),
                 status: document.getElementById('p2-status'),
-                name: document.getElementById('p2-name')
+                name: document.getElementById('p2-name'),
+                hpText: document.getElementById('p2-hp-text')
             }
         };
 
@@ -373,10 +375,12 @@ function updateHealthUI() {
     if (ui.p1 && ui.p1.bar) {
         ui.p1.bar.value = state.player.currentHp;
         ui.p1.bar.max = state.player.maxHp;
+        if (ui.p1.hpText) ui.p1.hpText.innerText = `${state.player.currentHp}/${state.player.maxHp}`;
     }
     if (ui.p2 && ui.p2.bar) {
         ui.p2.bar.value = state.cpu.currentHp;
         ui.p2.bar.max = state.cpu.maxHp;
+        if (ui.p2.hpText) ui.p2.hpText.innerText = `${state.cpu.currentHp}/${state.cpu.maxHp}`;
     }
 
     // Status Text

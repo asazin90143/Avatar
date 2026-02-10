@@ -54,13 +54,19 @@
 
                 <div class="hud">
                     <div class="player-stats">
-                        <span id="p1-name">Player</span>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span id="p1-name">Player</span>
+                            <span id="p1-hp-text" style="font-size: 10px;">100/100</span>
+                        </div>
                         <progress class="nes-progress is-success" value="100" max="100" id="p1-health"></progress>
                         <div id="p1-status" class="status-effects"></div>
                     </div>
                     <div class="vs">VS</div>
                     <div class="player-stats">
-                        <span id="p2-name">CPU</span>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span id="p2-name">CPU</span>
+                            <span id="p2-hp-text" style="font-size: 10px;">100/100</span>
+                        </div>
                         <progress class="nes-progress is-error" value="100" max="100" id="p2-health"></progress>
                         <div id="p2-status" class="status-effects"></div>
                     </div>
