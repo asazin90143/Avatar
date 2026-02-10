@@ -141,7 +141,8 @@ function createFighter(key, isCpu) {
         maxHp: template.hp,
         currentHp: template.hp,
         isAvatar: (key === 'avatar'),
-        effects: { stun: 0, burn: 0, evade: 0 }
+        effects: { stun: 0, burn: 0, evade: 0 },
+        cooldowns: { mid: 0, heavy: 0, special: 0 } // Track cooldowns
     };
 }
 
@@ -196,6 +197,36 @@ function executeMove(moveType) {
         endTurn();
         return;
     }
+
+    // Check Cooldown
+    if (state.player.cooldowns[moveType] > 0) {
+        log(`${moveType.toUpperCase()} is on cooldown! (${state.player.cooldowns[moveType]} turns left)`);
+        return;
+    }
+
+    // Apply Cooldown
+    if (moveType === 'mid') state.player.cooldowns.mid = 2; // Can use again after 1 turn (sets to 2, decrements start of next turn = 1 turn wait?)
+    // Wait, let's clarify "1 turn cooldown".
+    // Usually means: Use turn 1. Turn 2 (blocked). Turn 3 (available).
+    // If I set to 2: 
+    //   Turn 1 (Use): Sets to 2. End turn.
+    //   CPU Turn. 
+    //   Turn 2 (Start): Decrement -> 1. Still > 0. Blocked. End turn.
+    //   CPU Turn.
+    //   Turn 3 (Start): Decrement -> 0. Available.
+    // So for "1 turn wait", we need:
+    // Light: 0
+    // Mid: 2 (blocked next turn)
+    // Heavy: 3 (blocked next 2 turns)
+    // Special: 4 (blocked next 3 turns)
+
+    // Request says: Mid - 1 turn, Heavy - 2 turns, Special - 3 turns.
+    // Let's assume standard game terms:
+    // 1 turn CD = skip 1 turn.
+
+    if (moveType === 'mid') state.player.cooldowns.mid = 2;
+    if (moveType === 'heavy') state.player.cooldowns.heavy = 3;
+    if (moveType === 'special') state.player.cooldowns.special = 4;
 
     // Execute Player Move
     performAttack(state.player, state.cpu, moveType);
@@ -325,13 +356,23 @@ function cpuTurn() {
     checkWinCondition();
 
     if (!state.isOver) {
-        // Process Player Status Effects before giving control back
+        // Process Player Logic for next turn
         processStatusEffects(state.player, "Player");
         if (state.player.currentHp <= 0) {
             checkWinCondition();
             return;
         }
+
+        // Cooldown Management
+        ['mid', 'heavy', 'special'].forEach(m => {
+            if (state.player.cooldowns[m] > 0) state.player.cooldowns[m]--;
+        });
+
+        // Update UI to reflect cooldown changes
+        updateHealthUI();
+
         state.turn = 'player';
+        log("Your Turn!"); // Visual cue
     }
 }
 
@@ -395,6 +436,31 @@ function updateHealthUI() {
     if (state.cpu.effects.stun > 0) p2Status += "STUNNED ";
     if (state.cpu.effects.evade > 0) p2Status += "EVASIVE ";
     if (ui.p2 && ui.p2.status) ui.p2.status.innerText = p2Status;
+
+    updateCooldownsUI();
+}
+
+function updateCooldownsUI() {
+    if (!state.player) return;
+
+    const moves = ['mid', 'heavy', 'special'];
+    moves.forEach(move => {
+        const btn = document.getElementById(`btn-${move}`);
+        if (btn) {
+            const cd = state.player.cooldowns[move];
+            if (cd > 0) {
+                btn.classList.add('is-disabled');
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.innerText = `${move.charAt(0).toUpperCase() + move.slice(1)} (${cd})`;
+            } else {
+                btn.classList.remove('is-disabled');
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.innerText = move.charAt(0).toUpperCase() + move.slice(1);
+            }
+        }
+    });
 }
 
 function checkWinCondition() {
