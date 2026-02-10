@@ -240,6 +240,8 @@ function executeMove(moveType) {
 }
 
 function performAttack(attacker, defender, moveType) {
+    triggerAttackVisuals(attacker, defender);
+
     if (moveType === 'special') {
         handleSpecial(attacker, defender);
     } else {
@@ -469,9 +471,46 @@ function checkWinCondition() {
         state.isOver = true;
         if (restartBtn) restartBtn.classList.remove('hidden');
     } else if (state.cpu.currentHp <= 0) {
-        log("You Won! Balance is restored.");
+        log("You Win! The world is saved.");
         state.isOver = true;
-        if (restartBtn) restartBtn.classList.remove('hidden');
+        document.getElementById('restart-btn').classList.remove('hidden');
+    }
+}
+
+function triggerAttackVisuals(attacker, defender) {
+    const isPlayerAttacking = (attacker === state.player);
+    const projectile = document.getElementById('projectile');
+    const targetSprite = isPlayerAttacking ? ui.p2.sprite : ui.p1.sprite;
+
+    if (projectile && targetSprite) {
+        // RESET & CONFIG
+        projectile.style.display = 'block';
+        projectile.className = `projectile projectile-${attacker.element}`;
+        projectile.style.transition = 'none';
+
+        // START POSITION (Approximate to match sprites)
+        // Arena height 550px. Sprites at bottom. 
+        // 65% is roughly aligned with sprite center vertically.
+        projectile.style.top = '65%';
+        projectile.style.left = isPlayerAttacking ? '20%' : '80%';
+
+        // FORCE REFLOW
+        void projectile.offsetWidth;
+
+        // ANIMATE MOVEMENT
+        projectile.style.transition = 'left 0.4s ease-in';
+        projectile.style.left = isPlayerAttacking ? '75%' : '25%';
+
+        // IMPACT & SHAKE
+        setTimeout(() => {
+            projectile.style.display = 'none';
+
+            // Add Shake
+            targetSprite.classList.add('shake-anim');
+            // Remove Shake after animation completes (0.5s CSS)
+            setTimeout(() => targetSprite.classList.remove('shake-anim'), 500);
+
+        }, 400); // 0.4s matches transition duration
     }
 }
 
