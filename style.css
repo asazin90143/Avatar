@@ -38,6 +38,12 @@ body {
 }
 
 /* --- CHARACTER SELECT --- */
+#char-select-screen .title {
+    color: #000 !important;
+    background-color: #fff;
+    /* Ensure bg is white for contrast */
+}
+
 .char-grid {
     display: flex;
     justify-content: center;
