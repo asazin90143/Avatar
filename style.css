@@ -325,3 +325,21 @@ body {
 .hidden {
     display: none !important;
 }
+
+/* --- PAUSE MENU --- */
+#pause-menu {
+    text-align: center;
+    min-width: 300px;
+}
+
+#pause-menu .title {
+    margin-bottom: 20px;
+}
+
+#pause-menu .dialog-menu {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 0;
+    margin-top: 15px;
+}

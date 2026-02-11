@@ -541,6 +541,27 @@ window.onerror = function (message, source, lineno, colno, error) {
     logError(`${message} at ${source}:${lineno}:${colno}`);
 };
 
+/* --- PAUSE / MENU --- */
+function togglePause() {
+    // Only allow pause during battle
+    if (!screens.battle || !screens.battle.classList.contains('active')) return;
+
+    const dialog = document.getElementById('pause-menu');
+    if (dialog) {
+        if (dialog.open) {
+            dialog.close();
+        } else {
+            dialog.showModal();
+        }
+    }
+}
+
+function quitGame() {
+    if (confirm("Are you sure you want to quit to the main menu?")) {
+        location.reload();
+    }
+}
+
 // Start
 document.addEventListener('DOMContentLoaded', () => {
     try {

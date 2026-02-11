@@ -61,7 +61,10 @@
                         <progress class="nes-progress is-success" value="100" max="100" id="p1-health"></progress>
                         <div id="p1-status" class="status-effects"></div>
                     </div>
-                    <div class="vs">VS</div>
+                    <div class="vs">
+                        <button class="nes-btn is-warning" onclick="togglePause()"
+                            style="padding: 2px 5px; font-size: 8px;">MENU</button>
+                    </div>
                     <div class="player-stats">
                         <div style="display: flex; justify-content: space-between;">
                             <span id="p2-name">CPU</span>
@@ -115,7 +118,16 @@
         </section>
     </div>
 
-    <!-- Debug console removed per request -->
+    <!-- Pause Menu Modal -->
+    <dialog class="nes-dialog is-rounded" id="pause-menu" style="z-index: 9999;">
+        <form method="dialog">
+            <p class="title">Game Paused</p>
+            <menu class="dialog-menu">
+                <button class="nes-btn is-primary" onclick="togglePause()">Resume</button>
+                <button class="nes-btn is-error" onclick="quitGame()">Quit</button>
+            </menu>
+        </form>
+    </dialog>
 
     <script src="game.js"></script>
 </body>
