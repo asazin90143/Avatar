@@ -60,6 +60,18 @@ function initDom() {
 
         if (!screens.select) throw new Error("Missing Select Screen div");
 
+        // Setup Menu Button Listener Explicitly
+        const menuBtn = document.getElementById('menu-btn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // prevent bubbling issues
+                togglePause();
+            });
+            logDebug("Menu button listener attached.");
+        } else {
+            logError("Menu button element not found!");
+        }
+
         logDebug("DOM Initialized Successfully");
     } catch (e) {
         logError("Failed to init DOM: " + e.message);
