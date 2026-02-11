@@ -543,8 +543,15 @@ window.onerror = function (message, source, lineno, colno, error) {
 
 /* --- PAUSE / MENU --- */
 function togglePause() {
+    console.log("togglePause called");
     // Only allow pause during battle
-    if (!screens.battle || !screens.battle.classList.contains('active')) return;
+    if (!screens.battle) {
+        console.error("screens.battle not defined");
+        return;
+    }
+    // Allow toggle even if not 'active' strictly if button is visible, but good practice to check logic.
+    // Let's comment out the strict check for debugging or if logic is flawed.
+    // if (!screens.battle.classList.contains('active')) { console.warn("Battle screen not active?"); return; }
 
     const dialog = document.getElementById('pause-menu');
     if (dialog) {
@@ -553,6 +560,8 @@ function togglePause() {
         } else {
             dialog.showModal();
         }
+    } else {
+        console.error("Pause menu dialog not found");
     }
 }
 
