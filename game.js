@@ -554,34 +554,37 @@ window.onerror = function (message, source, lineno, colno, error) {
 };
 
 /* --- PAUSE / MENU --- */
-function togglePause() {
-    console.log("togglePause called");
-    // Only allow pause during battle
-    if (!screens.battle) {
-        console.error("screens.battle not defined");
-        return;
-    }
-    // Allow toggle even if not 'active' strictly if button is visible, but good practice to check logic.
-    // Let's comment out the strict check for debugging or if logic is flawed.
-    // if (!screens.battle.classList.contains('active')) { console.warn("Battle screen not active?"); return; }
+/* --- PAUSE / MENU --- */
+window.togglePause = function () {
+    console.log("togglePause invoked");
 
     const dialog = document.getElementById('pause-menu');
     if (dialog) {
         if (dialog.open) {
             dialog.close();
         } else {
-            dialog.showModal();
+            try {
+                dialog.showModal();
+            } catch (e) {
+                console.error("Dialog error:", e);
+                // Fallback
+                if (confirm("Game Paused. return to main menu?")) {
+                    location.reload();
+                }
+            }
         }
     } else {
-        console.error("Pause menu dialog not found");
+        console.warn("Pause dialog missing, using fallback.");
+        if (confirm("Game Paused. Return to main menu?")) {
+            location.reload();
+        }
     }
-}
+};
 
-function quitGame() {
-    if (confirm("Are you sure you want to quit to the main menu?")) {
-        location.reload();
-    }
-}
+window.quitGame = function () {
+    // No confirmation needed inside the menu since they clicked 'Quit'
+    location.reload();
+};
 
 // Start
 document.addEventListener('DOMContentLoaded', () => {
