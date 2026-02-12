@@ -527,6 +527,10 @@ function nextRound() {
     state.player.currentHp = Math.min(state.player.maxHp, state.player.currentHp + bonusHp);
     const healedAmount = state.player.currentHp - oldHp;
 
+    // Refresh Stats & Abilities
+    state.player.cooldowns = { mid: 0, heavy: 0, special: 0 };
+    state.player.effects = { stun: 0, burn: 0, evade: 0 };
+
     // Create New CPU
     const keys = ['water', 'fire', 'earth', 'air'];
     const cpuKey = keys[Math.floor(Math.random() * keys.length)];
