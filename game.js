@@ -19,7 +19,9 @@ const state = {
     cpu: null,
     turn: 'player', // 'player' or 'cpu'
     isOver: false,
-    map: null
+    map: null,
+    streak: 0,
+    gameMode: 'single' // 'single' or 'endless'
 };
 
 /* --- DOM ELEMENTS --- */
@@ -35,6 +37,7 @@ function initDom() {
         screens = {
             select: document.getElementById('char-select-screen'),
             map: document.getElementById('map-select-screen'),
+            mode: document.getElementById('mode-select-screen'),
             battle: document.getElementById('battle-screen')
         };
 
@@ -158,13 +161,31 @@ function createFighter(key, isCpu) {
     };
 }
 
-function startGame(mapName) {
-    logDebug(`Starting game on map: ${mapName}`);
+/* --- MAP & MODE SELECTION --- */
+function selectMap(mapName) {
     state.map = mapName;
+    logDebug(`Map Selected: ${mapName}`);
 
+    // Switch to Mode Screen
     if (screens.map) {
         screens.map.classList.remove('active');
         screens.map.classList.add('hidden');
+    }
+    if (screens.mode) {
+        screens.mode.classList.remove('hidden');
+        screens.mode.classList.add('active');
+    }
+}
+
+function startGame(mode) {
+    logDebug(`Starting game in ${mode} mode`);
+    state.gameMode = mode;
+    state.streak = 0;
+
+    // Switch to Battle Screen
+    if (screens.mode) {
+        screens.mode.classList.remove('active');
+        screens.mode.classList.add('hidden');
     }
     if (screens.battle) {
         screens.battle.classList.remove('hidden');
@@ -176,25 +197,32 @@ function startGame(mapName) {
     if (arena) {
         arena.style.backgroundSize = 'cover';
         arena.style.backgroundPosition = 'center';
-        if (mapName.includes('Water')) arena.style.backgroundImage = "url('./background/Water Tribe.jpg')";
-        if (mapName.includes('Fire')) arena.style.backgroundImage = "url('./background/Fire Nation.jpg')";
-        if (mapName.includes('Earth')) arena.style.backgroundImage = "url('./background/Earth Kingdom.jpg')";
-        if (mapName.includes('Air')) arena.style.backgroundImage = "url('./background/Air Temple.jpg')";
+        const map = state.map;
+        if (map.includes('Water')) arena.style.backgroundImage = "url('./background/Water Tribe.jpg')";
+        else if (map.includes('Fire')) arena.style.backgroundImage = "url('./background/Fire Nation Ship.jpg')";
+        else if (map.includes('Earth')) arena.style.backgroundImage = "url('./background/Earth Kingdom.jpg')";
+        else arena.style.backgroundImage = "url('./background/Air Temple.jpg')";
     }
 
+    // Setup UI
     if (ui.p1 && ui.p1.name) ui.p1.name.innerText = state.player.name;
     if (ui.p2 && ui.p2.name) ui.p2.name.innerText = state.cpu.name;
 
     updateHealthUI();
+    updateCooldownsUI();
 
-    // If Player is Avatar, show Switch Panel
+    // Reset Turn
+    state.isOver = false;
+    state.turn = 'player';
+
+    // Avatar text/panel logic (moved from old startGame)
     if (state.player.isAvatar) {
         const switchPanel = document.getElementById('avatar-switch-panel');
         if (switchPanel) switchPanel.classList.remove('hidden');
-        state.player.element = 'water'; // Default start element
-        log("Avatar State Active! Choose your element.");
+        state.player.element = 'water';
+        log("Avatar State: Choose element! " + (mode === 'endless' ? "Defeat as many as you can!" : "Defeat the enemy!"));
     } else {
-        log(`Battle Start! ${state.player.name} vs ${state.cpu.name}`);
+        log(`Battle Start! ${state.player.name} vs ${state.cpu.name}` + (mode === 'endless' ? " (Endless Mode)" : ""));
     }
 }
 
@@ -473,12 +501,54 @@ function checkWinCondition() {
     if (state.player.currentHp <= 0) {
         log("You Lost! The Fire Nation wins...");
         state.isOver = true;
-        if (restartBtn) restartBtn.classList.remove('hidden');
-    } else if (state.cpu.currentHp <= 0) {
-        log("You Win! The world is saved.");
-        state.isOver = true;
         document.getElementById('restart-btn').classList.remove('hidden');
+    } else if (state.cpu.currentHp <= 0) {
+        if (state.gameMode === 'endless') {
+            log("Enemy Defeated! Next round starting...");
+            state.isOver = true; // Briefly pause
+            setTimeout(() => {
+                state.isOver = false;
+                nextRound();
+            }, 1000);
+        } else {
+            log("You Win! The world is saved.");
+            state.isOver = true;
+            document.getElementById('restart-btn').classList.remove('hidden');
+        }
     }
+}
+
+function nextRound() {
+    state.streak++;
+
+    // Heal Player (30%)
+    const bonusHp = Math.floor(state.player.maxHp * 0.3);
+    const oldHp = state.player.currentHp;
+    state.player.currentHp = Math.min(state.player.maxHp, state.player.currentHp + bonusHp);
+    const healedAmount = state.player.currentHp - oldHp;
+
+    // Create New CPU
+    const keys = ['water', 'fire', 'earth', 'air'];
+    const cpuKey = keys[Math.floor(Math.random() * keys.length)];
+    state.cpu = createFighter(cpuKey, true);
+
+    // Scale CPU Difficulty (+15% HP per round)
+    const scaling = 1 + (state.streak * 0.15);
+    state.cpu.maxHp = Math.floor(state.cpu.maxHp * scaling);
+    state.cpu.currentHp = state.cpu.maxHp;
+
+    // Update CPU UI
+    if (ui.p2 && ui.p2.sprite) ui.p2.sprite.className = `sprite ${cpuKey}-bender`;
+    if (ui.p2 && ui.p2.name) ui.p2.name.innerText = `${state.cpu.name} (R${state.streak + 1})`;
+
+    // Reset Turn
+    state.turn = 'player';
+
+    // Update visuals
+    updateHealthUI();
+    updateCooldownsUI();
+
+    log(`Round ${state.streak + 1}! A new level ${state.streak + 1} ${state.cpu.name} appears! (+${healedAmount} HP)`);
 }
 
 function triggerAttackVisuals(attacker, defender) {

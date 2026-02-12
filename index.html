@@ -41,10 +41,29 @@
             <div class="nes-container with-title is-centered">
                 <p class="title">Select Battleground</p>
                 <div class="map-options">
-                    <button class="nes-btn is-primary" onclick="startGame('Air Temple')">Air Temple</button>
-                    <button class="nes-btn is-error" onclick="startGame('Fire Nation Ship')">Fire Nation</button>
-                    <button class="nes-btn is-success" onclick="startGame('Earth Kingdom')">Earth Kingdom</button>
-                    <button class="nes-btn is-primary" onclick="startGame('Water Tribe')">Water Tribe</button>
+                    <button class="nes-btn is-primary" onclick="selectMap('Air Temple')">Air Temple</button>
+                    <button class="nes-btn is-error" onclick="selectMap('Fire Nation Ship')">Fire Nation</button>
+                    <button class="nes-btn is-success" onclick="selectMap('Earth Kingdom')">Earth Kingdom</button>
+                    <button class="nes-btn is-primary" onclick="selectMap('Water Tribe')">Water Tribe</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="mode-select-screen" class="screen hidden">
+            <div class="nes-container with-title is-centered">
+                <p class="title">Select Game Mode</p>
+                <div class="mode-options" style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
+                    <div style="flex: 1;">
+                        <button class="nes-btn is-primary" onclick="startGame('single')" style="width: 100%;">Single
+                            Match</button>
+                        <p style="font-size: 10px; margin-top: 5px;">One opponent. Win or die.</p>
+                    </div>
+                    <div style="flex: 1;">
+                        <button class="nes-btn is-error" onclick="startGame('endless')" style="width: 100%;">Endless
+                            Mode</button>
+                        <p style="font-size: 10px; margin-top: 5px;">Fight until you drop! HP carries over partially.
+                        </p>
+                    </div>
                 </div>
             </div>
         </section>
