@@ -280,6 +280,7 @@ function executeMove(moveType) {
 }
 
 function performAttack(attacker, defender, moveType) {
+    if (SoundManager) SoundManager.playAttack(moveType);
     triggerAttackVisuals(attacker, defender);
 
     if (moveType === 'special') {
@@ -316,6 +317,7 @@ function handleSpecial(attacker, defender) {
         // Fire special: Immediate burst + strong Burn DOT
         const burstDmg = 20;
         defender.currentHp -= burstDmg;
+        if (typeof SoundManager !== 'undefined') SoundManager.playDamage();
         if (defender.currentHp < 0) defender.currentHp = 0;
         defender.effects.burn = 5; // 5 turns of burn
         log(`${name} used INFERNO! ${burstDmg} dmg + BURN for 5 turns!`);
@@ -357,6 +359,11 @@ function applyDamage(target, amount) {
             return 0; // No damage
         }
     }
+
+    if (amount > 0 && typeof SoundManager !== 'undefined') {
+        SoundManager.playDamage();
+    }
+
     target.currentHp -= amount;
     if (target.currentHp < 0) target.currentHp = 0;
     return amount;
@@ -501,10 +508,12 @@ function checkWinCondition() {
     if (state.player.currentHp <= 0) {
         log("You Lost! The Fire Nation wins...");
         state.isOver = true;
+        if (typeof SoundManager !== 'undefined') SoundManager.playLose();
         document.getElementById('restart-btn').classList.remove('hidden');
     } else if (state.cpu.currentHp <= 0) {
         if (state.gameMode === 'endless') {
             log("Enemy Defeated! Next round starting...");
+            if (typeof SoundManager !== 'undefined') SoundManager.playWin();
             state.isOver = true; // Briefly pause
             setTimeout(() => {
                 state.isOver = false;
@@ -513,6 +522,7 @@ function checkWinCondition() {
         } else {
             log("You Win! The world is saved.");
             state.isOver = true;
+            if (typeof SoundManager !== 'undefined') SoundManager.playWin();
             document.getElementById('restart-btn').classList.remove('hidden');
         }
     }
@@ -660,11 +670,29 @@ window.quitGame = function () {
     location.reload();
 };
 
+window.toggleMute = function () {
+    const isMuted = SoundManager.toggleMute();
+    const btn = document.getElementById('mute-btn-dialog');
+    if (btn) {
+        btn.innerText = isMuted ? "Unmute" : "Mute";
+        btn.classList.toggle('is-disabled', isMuted);
+    }
+};
+
 // Start
 document.addEventListener('DOMContentLoaded', () => {
     try {
         console.log("Game script starting...");
+        SoundManager.init(); // Init audio context
         init();
+
+        // Resume Audio context on first click anywhere (browser policy)
+        document.body.addEventListener('click', () => {
+            if (SoundManager.ctx && SoundManager.ctx.state === 'suspended') {
+                SoundManager.ctx.resume();
+            }
+        }, { once: true });
+
     } catch (e) {
         logError(e.message);
     }

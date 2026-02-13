@@ -143,11 +143,13 @@
             <p class="title">Game Paused</p>
             <menu class="dialog-menu">
                 <button class="nes-btn is-primary" onclick="togglePause()">Resume</button>
+                <button id="mute-btn-dialog" class="nes-btn is-warning" onclick="toggleMute()">Mute</button>
                 <button class="nes-btn is-error" onclick="quitGame()">Quit</button>
             </menu>
         </form>
     </dialog>
 
+    <script src="sound.js"></script>
     <script src="game.js"></script>
 </body>
 
