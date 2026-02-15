@@ -498,7 +498,7 @@ if (!state.isOver) {
     state.turn = 'player';
     log("Your Turn!"); // Visual cue
 }
-}
+
 
 function processStatusEffects(char, name) {
     // Burn - Enhanced: 8% max HP per turn
