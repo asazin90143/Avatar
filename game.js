@@ -21,7 +21,8 @@ const state = {
     isOver: false,
     map: null,
     streak: 0,
-    gameMode: 'single' // 'single' or 'endless'
+    gameMode: 'single', // 'single', 'endless', '1v1'
+    setupPhase: 'p1' // 'p1', 'p2'
 };
 
 /* --- DOM ELEMENTS --- */
@@ -122,31 +123,71 @@ function init() {
     logDebug("Character buttons generated.");
 }
 
-function selectCharacter(key) {
-    logDebug(`Selected character: ${key}`);
+/* --- 1v1 SETUP --- */
+function start1v1Setup() {
+    state.gameMode = '1v1';
+    state.setupPhase = 'p2';
+    logDebug("1v1 Mode Selected. Player 2 choosing character.");
 
-    // Player Setup
-    state.player = createFighter(key, false);
-
-    // CPU Setup (Random, but not Avatar to keep it simple)
-    const keys = ['water', 'fire', 'earth', 'air'];
-    const cpuKey = keys[Math.floor(Math.random() * keys.length)];
-    state.cpu = createFighter(cpuKey, true);
-
-    // Update Sprites
-    if (ui.p1 && ui.p1.sprite) ui.p1.sprite.className = `sprite ${key}-bender`;
-    if (ui.p2 && ui.p2.sprite) ui.p2.sprite.className = `sprite ${cpuKey}-bender`;
-
-    // Switch to Map Screen
+    // Switch to Char Select Screen
+    if (screens.mode) {
+        screens.mode.classList.remove('active');
+        screens.mode.classList.add('hidden');
+    }
     if (screens.select) {
-        screens.select.classList.remove('active');
-        screens.select.classList.add('hidden');
+        screens.select.classList.remove('hidden');
+        screens.select.classList.add('active');
     }
-    if (screens.map) {
-        screens.map.classList.remove('hidden');
-        screens.map.classList.add('active');
+
+    // Update Title
+    const title = document.querySelector('#char-select-screen .title');
+    if (title) title.innerText = "Player 2: Choose Your Element!";
+}
+
+function selectCharacter(key) {
+    logDebug(`Selected character: ${key} (Phase: ${state.setupPhase})`);
+
+    if (state.setupPhase === 'p1') {
+        // Player 1 Setup
+        state.player = createFighter(key, false);
+        state.player.name = "Player 1";
+
+        // Default CPU logic (for single/endless preview)
+        const keys = ['water', 'fire', 'earth', 'air'];
+        const cpuKey = keys[Math.floor(Math.random() * keys.length)];
+        state.cpu = createFighter(cpuKey, true);
+
+        // Update Sprites
+        if (ui.p1 && ui.p1.sprite) ui.p1.sprite.className = `sprite ${key}-bender`;
+        if (ui.p2 && ui.p2.sprite) ui.p2.sprite.className = `sprite ${cpuKey}-bender`;
+
+        // Switch to Map Screen
+        if (screens.select) {
+            screens.select.classList.remove('active');
+            screens.select.classList.add('hidden');
+        }
+        if (screens.map) {
+            screens.map.classList.remove('hidden');
+            screens.map.classList.add('active');
+        }
+        logDebug("Switched to Map Selection screen");
     }
-    logDebug("Switched to Map Selection screen");
+    else if (state.gameMode === '1v1' && state.setupPhase === 'p2') {
+        // Player 2 Setup
+        state.cpu = createFighter(key, false); // isCpu = false
+        state.cpu.name = "Player 2";
+
+        // Update Sprites
+        if (ui.p2 && ui.p2.sprite) ui.p2.sprite.className = `sprite ${key}-bender`;
+
+        // Start Game
+        // Hide Select Screen handled in startGame
+        if (screens.select) {
+            screens.select.classList.remove('active');
+            screens.select.classList.add('hidden');
+        }
+        startGame('1v1');
+    }
 }
 
 function createFighter(key, isCpu) {
@@ -227,49 +268,46 @@ function startGame(mode) {
 }
 
 /* --- BATTLE LOGIC --- */
+/* --- BATTLE LOGIC --- */
 function executeMove(moveType) {
-    if (state.turn !== 'player' || state.isOver) return;
+    if (state.isOver) return;
+
+    let actor = state.player;
+    let target = state.cpu;
+
+    // Determine Turn
+    if (state.turn === 'player') {
+        // P1 acting
+    } else if (state.turn === 'cpu') {
+        if (state.gameMode === '1v1') {
+            actor = state.cpu; // P2 acting
+            target = state.player;
+        } else {
+            return; // Ignore clicks during AI turn
+        }
+    }
 
     // Check Stun
-    if (state.player.effects.stun > 0) {
-        log("You are STUNNED and cannot move!");
-        state.player.effects.stun--;
+    if (actor.effects.stun > 0) {
+        log(`${actor.name} is STUNNED and cannot move!`);
+        actor.effects.stun--;
         endTurn();
         return;
     }
 
     // Check Cooldown
-    if (state.player.cooldowns[moveType] > 0) {
-        log(`${moveType.toUpperCase()} is on cooldown! (${state.player.cooldowns[moveType]} turns left)`);
+    if (actor.cooldowns[moveType] > 0) {
+        log(`${moveType.toUpperCase()} is on cooldown! (${actor.cooldowns[moveType]} turns left)`);
         return;
     }
 
     // Apply Cooldown
-    if (moveType === 'mid') state.player.cooldowns.mid = 2; // Can use again after 1 turn (sets to 2, decrements start of next turn = 1 turn wait?)
-    // Wait, let's clarify "1 turn cooldown".
-    // Usually means: Use turn 1. Turn 2 (blocked). Turn 3 (available).
-    // If I set to 2: 
-    //   Turn 1 (Use): Sets to 2. End turn.
-    //   CPU Turn. 
-    //   Turn 2 (Start): Decrement -> 1. Still > 0. Blocked. End turn.
-    //   CPU Turn.
-    //   Turn 3 (Start): Decrement -> 0. Available.
-    // So for "1 turn wait", we need:
-    // Light: 0
-    // Mid: 2 (blocked next turn)
-    // Heavy: 3 (blocked next 2 turns)
-    // Special: 4 (blocked next 3 turns)
+    if (moveType === 'mid') actor.cooldowns.mid = 2;
+    if (moveType === 'heavy') actor.cooldowns.heavy = 3;
+    if (moveType === 'special') actor.cooldowns.special = 4;
 
-    // Request says: Mid - 1 turn, Heavy - 2 turns, Special - 3 turns.
-    // Let's assume standard game terms:
-    // 1 turn CD = skip 1 turn.
-
-    if (moveType === 'mid') state.player.cooldowns.mid = 2;
-    if (moveType === 'heavy') state.player.cooldowns.heavy = 3;
-    if (moveType === 'special') state.player.cooldowns.special = 4;
-
-    // Execute Player Move
-    performAttack(state.player, state.cpu, moveType);
+    // Execute Move
+    performAttack(actor, target, moveType);
 
     updateHealthUI();
     checkWinCondition();
@@ -371,15 +409,42 @@ function applyDamage(target, amount) {
 
 /* --- TURN HANDLING --- */
 function endTurn() {
-    state.turn = 'cpu';
+    if (state.turn === 'player') {
+        // Player 1 finished turn -> Switch to CPU/P2
+        state.turn = 'cpu';
+        const name = (state.gameMode === '1v1') ? "Player 2" : "CPU";
 
-    // Process CPU Status Effects (Burn/Evade)
-    processStatusEffects(state.cpu, "CPU");
-    if (state.cpu.currentHp <= 0) { checkWinCondition(); return; }
+        // Cooldowns for CPU/P2 need to tick down at start of their turn
+        ['mid', 'heavy', 'special'].forEach(m => {
+            if (state.cpu.cooldowns[m] > 0) state.cpu.cooldowns[m]--;
+        });
 
-    setTimeout(() => {
-        cpuTurn();
-    }, 1500);
+        processStatusEffects(state.cpu, name);
+        if (state.cpu.currentHp <= 0) { checkWinCondition(); return; }
+
+        if (state.gameMode !== '1v1') {
+            setTimeout(() => {
+                cpuTurn();
+            }, 1500);
+        } else {
+            log("Player 2's Turn!");
+            updateCooldownsUI();
+        }
+    } else {
+        // Player 2 finished turn -> Switch to Player 1
+        state.turn = 'player';
+
+        // Cooldowns for P1 tick down
+        ['mid', 'heavy', 'special'].forEach(m => {
+            if (state.player.cooldowns[m] > 0) state.player.cooldowns[m]--;
+        });
+
+        processStatusEffects(state.player, "Player 1");
+        if (state.player.currentHp <= 0) { checkWinCondition(); return; }
+
+        log("Player 1's Turn!");
+        updateCooldownsUI();
+    }
 }
 
 function cpuTurn() {
@@ -389,40 +454,50 @@ function cpuTurn() {
     if (state.cpu.effects.stun > 0) {
         log("CPU is STUNNED!");
         state.cpu.effects.stun--;
+
+        // Skip turn -> Back to Player
         state.turn = 'player';
-        processStatusEffects(state.player, "Player");
-        return;
-    }
-
-    // AI Logic
-    const moves = ['light', 'mid', 'heavy', 'special'];
-    // 25% chance to use special
-    const move = moves[Math.floor(Math.random() * moves.length)];
-
-    performAttack(state.cpu, state.player, move);
-
-    updateHealthUI();
-    checkWinCondition();
-
-    if (!state.isOver) {
-        // Process Player Logic for next turn
-        processStatusEffects(state.player, "Player");
-        if (state.player.currentHp <= 0) {
-            checkWinCondition();
-            return;
-        }
-
-        // Cooldown Management
         ['mid', 'heavy', 'special'].forEach(m => {
             if (state.player.cooldowns[m] > 0) state.player.cooldowns[m]--;
         });
-
-        // Update UI to reflect cooldown changes
-        updateHealthUI();
-
-        state.turn = 'player';
-        log("Your Turn!"); // Visual cue
+        updateCooldownsUI();
+        processStatusEffects(state.player, "Player");
+        log("Your Turn!");
+        return;
     }
+    processStatusEffects(state.player, "Player");
+    return;
+}
+
+// AI Logic
+const moves = ['light', 'mid', 'heavy', 'special'];
+// 25% chance to use special
+const move = moves[Math.floor(Math.random() * moves.length)];
+
+performAttack(state.cpu, state.player, move);
+
+updateHealthUI();
+checkWinCondition();
+
+if (!state.isOver) {
+    // Process Player Logic for next turn
+    processStatusEffects(state.player, "Player");
+    if (state.player.currentHp <= 0) {
+        checkWinCondition();
+        return;
+    }
+
+    // Cooldown Management
+    ['mid', 'heavy', 'special'].forEach(m => {
+        if (state.player.cooldowns[m] > 0) state.player.cooldowns[m]--;
+    });
+
+    // Update UI to reflect cooldown changes
+    updateHealthUI();
+
+    state.turn = 'player';
+    log("Your Turn!"); // Visual cue
+}
 }
 
 function processStatusEffects(char, name) {
@@ -482,13 +557,18 @@ function updateHealthUI() {
 }
 
 function updateCooldownsUI() {
-    if (!state.player) return;
+    let actor = state.player;
+    if (state.gameMode === '1v1' && state.turn === 'cpu') {
+        actor = state.cpu;
+    }
+
+    if (!actor) return;
 
     const moves = ['mid', 'heavy', 'special'];
     moves.forEach(move => {
         const btn = document.getElementById(`btn-${move}`);
         if (btn) {
-            const cd = state.player.cooldowns[move];
+            const cd = actor.cooldowns[move];
             if (cd > 0) {
                 btn.classList.add('is-disabled');
                 btn.style.opacity = '0.5';
@@ -502,13 +582,28 @@ function updateCooldownsUI() {
             }
         }
     });
+
+    // Update Avatar Switch Panel Visibility based on active player
+    const switchPanel = document.getElementById('avatar-switch-panel');
+    if (switchPanel) {
+        if (actor.isAvatar) {
+            switchPanel.classList.remove('hidden');
+        } else {
+            switchPanel.classList.add('hidden');
+        }
+    }
 }
 
 function checkWinCondition() {
     if (state.player.currentHp <= 0) {
-        log("You Lost! The Fire Nation wins...");
+        if (state.gameMode === '1v1') {
+            log("Player 2 WINS!");
+            if (typeof SoundManager !== 'undefined') SoundManager.playWin();
+        } else {
+            log("You Lost! The Fire Nation wins...");
+            if (typeof SoundManager !== 'undefined') SoundManager.playLose();
+        }
         state.isOver = true;
-        if (typeof SoundManager !== 'undefined') SoundManager.playLose();
         document.getElementById('restart-btn').classList.remove('hidden');
     } else if (state.cpu.currentHp <= 0) {
         if (state.gameMode === 'endless') {
@@ -520,7 +615,11 @@ function checkWinCondition() {
                 nextRound();
             }, 1000);
         } else {
-            log("You Win! The world is saved.");
+            if (state.gameMode === '1v1') {
+                log("Player 1 WINS!");
+            } else {
+                log("You Win! The world is saved.");
+            }
             state.isOver = true;
             if (typeof SoundManager !== 'undefined') SoundManager.playWin();
             document.getElementById('restart-btn').classList.remove('hidden');
