@@ -268,7 +268,6 @@ function startGame(mode) {
 }
 
 /* --- BATTLE LOGIC --- */
-/* --- BATTLE LOGIC --- */
 function executeMove(moveType) {
     if (state.isOver) return;
 
@@ -465,38 +464,36 @@ function cpuTurn() {
         log("Your Turn!");
         return;
     }
-    processStatusEffects(state.player, "Player");
-    return;
-}
 
-// AI Logic
-const moves = ['light', 'mid', 'heavy', 'special'];
-// 25% chance to use special
-const move = moves[Math.floor(Math.random() * moves.length)];
+    // AI Logic
+    const moves = ['light', 'mid', 'heavy', 'special'];
+    // Random move selection
+    const move = moves[Math.floor(Math.random() * moves.length)];
 
-performAttack(state.cpu, state.player, move);
+    performAttack(state.cpu, state.player, move);
 
-updateHealthUI();
-checkWinCondition();
-
-if (!state.isOver) {
-    // Process Player Logic for next turn
-    processStatusEffects(state.player, "Player");
-    if (state.player.currentHp <= 0) {
-        checkWinCondition();
-        return;
-    }
-
-    // Cooldown Management
-    ['mid', 'heavy', 'special'].forEach(m => {
-        if (state.player.cooldowns[m] > 0) state.player.cooldowns[m]--;
-    });
-
-    // Update UI to reflect cooldown changes
     updateHealthUI();
+    checkWinCondition();
 
-    state.turn = 'player';
-    log("Your Turn!"); // Visual cue
+    if (!state.isOver) {
+        // Process Player Logic for next turn
+        processStatusEffects(state.player, "Player");
+        if (state.player.currentHp <= 0) {
+            checkWinCondition();
+            return;
+        }
+
+        // Cooldown Management
+        ['mid', 'heavy', 'special'].forEach(m => {
+            if (state.player.cooldowns[m] > 0) state.player.cooldowns[m]--;
+        });
+
+        // Update UI
+        updateHealthUI();
+
+        state.turn = 'player';
+        log("Your Turn!"); // Visual cue
+    }
 }
 
 
@@ -736,7 +733,6 @@ window.onerror = function (message, source, lineno, colno, error) {
     logError(`${message} at ${source}:${lineno}:${colno}`);
 };
 
-/* --- PAUSE / MENU --- */
 /* --- PAUSE / MENU --- */
 window.togglePause = function () {
     console.log("togglePause invoked");
