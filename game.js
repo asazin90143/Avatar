@@ -39,7 +39,8 @@ function initDom() {
             select: document.getElementById('char-select-screen'),
             map: document.getElementById('map-select-screen'),
             mode: document.getElementById('mode-select-screen'),
-            battle: document.getElementById('battle-screen')
+            battle: document.getElementById('battle-screen'),
+            start: document.getElementById('start-screen')
         };
 
         logs = document.getElementById('battle-log');
@@ -123,13 +124,25 @@ function init() {
     logDebug("Character buttons generated.");
 }
 
-/* --- 1v1 SETUP --- */
-function start1v1Setup() {
-    state.gameMode = '1v1';
-    state.setupPhase = 'p2';
-    logDebug("1v1 Mode Selected. Player 2 choosing character.");
+/* --- NAVIGATION & SETUP --- */
+function showModeSelect() {
+    logDebug("Show Mode Select");
+    if (screens.start) {
+        screens.start.classList.remove('active');
+        screens.start.classList.add('hidden');
+    }
+    if (screens.mode) {
+        screens.mode.classList.remove('hidden');
+        screens.mode.classList.add('active');
+    }
+}
 
-    // Switch to Char Select Screen
+function selectMode(mode) {
+    state.gameMode = mode;
+    state.setupPhase = 'p1';
+    logDebug(`Mode Selected: ${mode}`);
+
+    // Switch to Char Select
     if (screens.mode) {
         screens.mode.classList.remove('active');
         screens.mode.classList.add('hidden');
@@ -139,9 +152,12 @@ function start1v1Setup() {
         screens.select.classList.add('active');
     }
 
-    // Update Title
-    const title = document.querySelector('#char-select-screen .title');
-    if (title) title.innerText = "Player 2: Choose Your Element!";
+    // Reset Title
+    const title = document.getElementById('char-select-title');
+    if (title) {
+        if (mode === '1v1') title.innerText = "Player 1: Choose Your Element";
+        else title.innerText = "Select Your Element";
+    }
 }
 
 function selectCharacter(key) {
@@ -152,16 +168,41 @@ function selectCharacter(key) {
         state.player = createFighter(key, false);
         state.player.name = "Player 1";
 
-        // Default CPU logic (for single/endless preview)
-        const keys = ['water', 'fire', 'earth', 'air'];
-        const cpuKey = keys[Math.floor(Math.random() * keys.length)];
-        state.cpu = createFighter(cpuKey, true);
-
-        // Update Sprites
+        // Update P1 Sprite
         if (ui.p1 && ui.p1.sprite) ui.p1.sprite.className = `sprite ${key}-bender`;
-        if (ui.p2 && ui.p2.sprite) ui.p2.sprite.className = `sprite ${cpuKey}-bender`;
 
-        // Switch to Map Screen
+        if (state.gameMode === '1v1') {
+            // Stay for P2
+            state.setupPhase = 'p2';
+            const title = document.getElementById('char-select-title');
+            if (title) title.innerText = "Player 2: Choose Your Element";
+        } else {
+            // Single/Endless -> Random CPU
+            const keys = ['water', 'fire', 'earth', 'air'];
+            const cpuKey = keys[Math.floor(Math.random() * keys.length)];
+            state.cpu = createFighter(cpuKey, true);
+
+            if (ui.p2 && ui.p2.sprite) ui.p2.sprite.className = `sprite ${cpuKey}-bender`;
+
+            // Go to Map Select
+            if (screens.select) {
+                screens.select.classList.remove('active');
+                screens.select.classList.add('hidden');
+            }
+            if (screens.map) {
+                screens.map.classList.remove('hidden');
+                screens.map.classList.add('active');
+            }
+        }
+    }
+    else if (state.gameMode === '1v1' && state.setupPhase === 'p2') {
+        // Player 2 Setup
+        state.cpu = createFighter(key, false);
+        state.cpu.name = "Player 2";
+
+        if (ui.p2 && ui.p2.sprite) ui.p2.sprite.className = `sprite ${key}-bender`;
+
+        // Go to Map Select
         if (screens.select) {
             screens.select.classList.remove('active');
             screens.select.classList.add('hidden');
@@ -170,23 +211,6 @@ function selectCharacter(key) {
             screens.map.classList.remove('hidden');
             screens.map.classList.add('active');
         }
-        logDebug("Switched to Map Selection screen");
-    }
-    else if (state.gameMode === '1v1' && state.setupPhase === 'p2') {
-        // Player 2 Setup
-        state.cpu = createFighter(key, false); // isCpu = false
-        state.cpu.name = "Player 2";
-
-        // Update Sprites
-        if (ui.p2 && ui.p2.sprite) ui.p2.sprite.className = `sprite ${key}-bender`;
-
-        // Start Game
-        // Hide Select Screen handled in startGame
-        if (screens.select) {
-            screens.select.classList.remove('active');
-            screens.select.classList.add('hidden');
-        }
-        startGame('1v1');
     }
 }
 
@@ -202,20 +226,19 @@ function createFighter(key, isCpu) {
     };
 }
 
-/* --- MAP & MODE SELECTION --- */
+/* --- MAP SELECTION --- */
 function selectMap(mapName) {
     state.map = mapName;
     logDebug(`Map Selected: ${mapName}`);
 
-    // Switch to Mode Screen
+    // Hide Map
     if (screens.map) {
         screens.map.classList.remove('active');
         screens.map.classList.add('hidden');
     }
-    if (screens.mode) {
-        screens.mode.classList.remove('hidden');
-        screens.mode.classList.add('active');
-    }
+
+    // Battle Start
+    startGame(state.gameMode);
 }
 
 function startGame(mode) {

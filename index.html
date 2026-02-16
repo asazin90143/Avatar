@@ -13,14 +13,26 @@
 <body>
 
     <div class="container">
-        <section id="char-select-screen" class="screen active">
+        <section id="start-screen" class="screen active">
+            <header>
+                <h1>Avatar</h1>
+                <p>Master the Elements</p>
+            </header>
+            <div class="nes-container with-title is-centered" style="margin-top: 50px;">
+                <p class="title">Welcome</p>
+                <button class="nes-btn is-primary" onclick="showModeSelect()" style="font-size: 20px;">Start
+                    Game</button>
+            </div>
+        </section>
+
+        <section id="char-select-screen" class="screen hidden">
             <header>
                 <h1>Avatar</h1>
                 <p>Master the Elements</p>
             </header>
 
             <div class="nes-container with-title is-centered">
-                <p class="title">Select Your Bender</p>
+                <p class="title" id="char-select-title">Select Your Bender</p>
                 <div class="char-grid" id="char-grid">
                     <!-- Fallback buttons in case JavaScript fails to generate them -->
                     <button class="nes-btn is-primary char-card" onclick="selectCharacter('water')"
@@ -54,19 +66,19 @@
                 <p class="title">Select Game Mode</p>
                 <div class="mode-options" style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
                     <div style="flex: 1;">
-                        <button class="nes-btn is-primary" onclick="startGame('single')" style="width: 100%;">Single
+                        <button class="nes-btn is-primary" onclick="selectMode('single')" style="width: 100%;">Single
                             Match</button>
                         <p style="font-size: 10px; margin-top: 5px;">One opponent. Win or die.</p>
                     </div>
                     <div style="flex: 1;">
-                        <button class="nes-btn is-error" onclick="startGame('endless')" style="width: 100%;">Endless
+                        <button class="nes-btn is-error" onclick="selectMode('endless')" style="width: 100%;">Endless
                             Mode</button>
                         <p style="font-size: 10px; margin-top: 5px;">Fight until you drop! HP carries over partially.
                         </p>
                     </div>
                 </div>
                 <div style="margin-top: 20px;">
-                    <button class="nes-btn is-success" onclick="start1v1Setup()" style="width: 100%;">1v1 Local
+                    <button class="nes-btn is-success" onclick="selectMode('1v1')" style="width: 100%;">1v1 Local
                         Multiplayer</button>
                     <p style="font-size: 10px; margin-top: 5px;">Hotseat: Take turns on the same device</p>
                 </div>
